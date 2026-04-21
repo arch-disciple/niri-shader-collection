@@ -1,0 +1,69 @@
+window-open{
+
+  duration-ms 500
+  curve "linear"
+
+  custom-shader r"
+
+    vec4 fill_bl_to_tr(vec3 coords_geo, vec3 size_geo) {
+
+      float progress = niri_clamped_progress;
+
+      vec2 coords = coords_geo.xy;
+
+      /*
+        left to right was
+          [ coords.x > progress ]
+
+        bottom to top was
+          [ (1.0 - coords.y) > progress ]
+
+        we get the following logic by combining these two
+      */
+
+      if ((coords.x + (1.0 - coords.y)) > ( progress * 2.0 ) || coords.x < 0.0 || coords.y < 0.0) {
+        return vec4(0.0);
+      }
+
+      vec3 coords_tex = niri_geo_to_tex * coords_geo;
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      return color;
+    }
+
+    vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+      return fill_bl_to_tr(coords_geo, size_geo);
+    }
+
+  "
+}
+
+window-close{
+
+  duration-ms 500
+  curve "linear"
+
+  custom-shader r"
+
+    vec4 wipe_bl_to_tr(vec3 coords_geo, vec3 size_geo) {
+
+      float progress = niri_clamped_progress;
+
+      vec2 coords = coords_geo.xy;
+
+      if ((coords.x + (1.0 - coords.y)) < ( progress * 2.0 ) || coords.x < 0.0 || coords.y < 0.0) {
+        return vec4(0.0);
+      }
+
+      vec3 coords_tex = niri_geo_to_tex * coords_geo;
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      return color;
+    }
+
+    vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+      return wipe_bl_to_tr(coords_geo, size_geo);
+    }
+
+  "
+}
