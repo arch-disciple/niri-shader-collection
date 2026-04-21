@@ -1,0 +1,84 @@
+window-open{
+
+  duration-ms 300
+  curve "ease-out-quad"
+
+  custom-shader r"
+
+    vec4 slide_from_right(vec3 coords_geo, vec3 size_geo){
+
+      float progress = niri_clamped_progress;
+
+      // The xy plane vector
+      vec2 coords = coords_geo.xy;
+
+      // Combined logic ( for slide effect from right to left )
+      coords.x -= (1.0 - progress);
+
+      /*
+        The combined logic can also be broken into the following steps
+
+        1. Translate to right
+          coords = coords - vec2(1.0, 0.0);
+
+        2. Use progress to move the window from the translated position
+          coords.x += progress;
+          ( only x component as we translated to right and not in vertical direction )
+
+        the combined logic is much cleaner that's why it was used
+      */
+
+      // Make pixels outside window bounds invisible
+      if ( coords.x > 1.0 || coords.x < 0.0 ) {
+        return vec4(0.0);
+      }
+
+      // Sample our own coords and get color
+      vec3 coords_tex = niri_geo_to_tex * vec3(coords, 1.0);
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      return color;
+    }
+
+    vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+      return slide_from_right(coords_geo, size_geo);
+    }
+
+  "
+}
+
+window-close{
+
+  duration-ms 300
+  curve "linear"
+
+  custom-shader r"
+
+    vec4 slide_to_right(vec3 coords_geo, vec3 size_geo){
+
+      float progress = niri_clamped_progress;
+
+      // The xy plane vector
+      vec2 coords = coords_geo.xy;
+
+      // Move the window to right
+      coords.x -= progress;
+
+      // Make pixels outside window bounds invisible
+      if ( coords.x > 1.0 || coords.x < 0.0 ) {
+        return vec4(0.0);
+      }
+
+      // Sample our own coords and get color
+      vec3 coords_tex = niri_geo_to_tex * vec3(coords, 1.0);
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      return color;
+    }
+
+    vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+      return slide_to_right(coords_geo, size_geo);
+    }
+
+  "
+}
