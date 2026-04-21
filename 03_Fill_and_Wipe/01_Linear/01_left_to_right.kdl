@@ -1,0 +1,65 @@
+window-open{
+
+  duration-ms 500
+  curve "linear"
+
+  custom-shader r"
+
+    vec4 fill_left_to_right(vec3 coords_geo, vec3 size_geo) {
+
+      float progress = niri_clamped_progress;
+
+      vec2 coords = coords_geo.xy;
+
+      // Logic to get fill effect from left to right
+      // The pixels become visible as the progress increases
+      if (coords.x > progress || coords.x < 0.0 || coords.y < 0.0) {
+        return vec4(0.0);
+      }
+
+      // Get color from window texture
+      vec3 coords_tex = niri_geo_to_tex * coords_geo;
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      return color;
+    }
+
+    vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+      return fill_left_to_right(coords_geo, size_geo);
+    }
+
+  "
+}
+
+window-close{
+
+  duration-ms 500
+  curve "linear"
+
+  custom-shader r"
+
+    vec4 wipe_left_to_right(vec3 coords_geo, vec3 size_geo) {
+
+      float progress = niri_clamped_progress;
+
+      vec2 coords = coords_geo.xy;
+
+      // Logic to get wipe effect from left to right
+      // The pixels become invisible as the progress increases
+      if (coords.x < progress || coords.x < 0.0 || coords.y < 0.0) {
+        return vec4(0.0);
+      }
+
+      // Get color from window texture
+      vec3 coords_tex = niri_geo_to_tex * coords_geo;
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      return color;
+    }
+
+    vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+      return wipe_left_to_right(coords_geo, size_geo);
+    }
+
+  "
+}
