@@ -1,0 +1,79 @@
+window-open{
+
+  duration-ms 300
+  curve "linear"
+
+  custom-shader r"
+
+    vec4 scale_up(vec3 coords_geo, vec3 size_geo) {
+
+      float progress = niri_clamped_progress;
+
+      // Scale window up from 25% to 100%
+      float scale = max(0.0, (progress * 0.75) + 0.25);
+
+      vec2 coords = coords_geo.xy;
+
+      vec2 center = vec2(0.5);
+
+      coords -= center; // Translate to center
+      coords /= scale;  // Scale
+      coords += center; // Translate back
+
+      if (coords.x < 0.0 || coords.x > 1.0 || coords.y < 0.0 || coords.y > 1.0) {
+        return vec4(0.0);
+      }
+
+      vec3 coords_tex = niri_geo_to_tex * vec3(coords, 1.0);
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      return color;
+    }
+
+    vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+      return scale_up(coords_geo, size_geo);
+    }
+
+  "
+}
+
+window-close{
+
+  duration-ms 300
+  curve "linear"
+
+  custom-shader r"
+
+    vec4 scale_down(vec3 coords_geo, vec3 size_geo) {
+
+      float progress = niri_clamped_progress;
+
+      float reverse_progress = 1.0 - progress;
+
+      // Scale window down from 100% to 25%
+      float scale = max(0.0, (reverse_progress * 0.75) + 0.25);
+
+      vec2 coords = coords_geo.xy;
+
+      vec2 center = vec2(0.5);
+
+      coords -= center; // Translate to center
+      coords /= scale;  // Scale
+      coords += center; // Translate back
+
+      if (coords.x < 0.0 || coords.x > 1.0 || coords.y < 0.0 || coords.y > 1.0) {
+        return vec4(0.0);
+      }
+
+      vec3 coords_tex = niri_geo_to_tex * vec3(coords, 1.0);
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      return color;
+    }
+
+    vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+      return scale_down(coords_geo, size_geo);
+    }
+
+  "
+}
