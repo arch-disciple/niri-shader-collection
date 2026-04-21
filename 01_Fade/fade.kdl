@@ -1,0 +1,57 @@
+window-open {
+
+  duration-ms 400
+  curve "ease-out-quad"
+
+  custom-shader r"
+
+    vec4 fade_in(vec3 coords_geo, vec3 size_geo){
+
+      float progress = niri_clamped_progress;
+
+      // Get color from window texture
+      vec3 coords_tex = niri_geo_to_tex * coords_geo;
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      // Make window opaque ( for fade in effect )
+      color *= progress;
+
+      return color;
+    }
+
+    vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+      return fade_in(coords_geo, size_geo);
+    }
+
+  "
+}
+
+window-close {
+
+  duration-ms 400
+  curve "ease-out-quad"
+
+  custom-shader r"
+
+    vec4 fade_out(vec3 coords_geo, vec3 size_geo){
+
+      float progress = niri_clamped_progress;
+
+      float reverse_progress = 1.0 - progress;
+
+      // Get color from window texture
+      vec3 coords_tex = niri_geo_to_tex * coords_geo;
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      // Make window transparent ( for fade out effect )
+      color *= reverse_progress;
+
+      return color;
+    }
+
+    vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+      return fade_out(coords_geo, size_geo);
+    }
+
+  "
+}
