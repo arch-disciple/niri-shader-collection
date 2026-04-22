@@ -1,0 +1,75 @@
+window-open{
+
+  duration-ms 500
+  curve "ease-out-quad"
+
+  custom-shader r"
+
+    vec4 expanding_circle(vec3 coords_geo, vec3 size_geo) {
+
+      float progress = niri_clamped_progress;
+
+      vec2 coords = coords_geo.xy;
+
+      // Change this to change the location from where expansion starts
+      vec2 center = vec2(0.5);
+
+      coords -= center;
+      coords *= size_geo.xy * 2.0;  // Remove [ * 2.0 ] if you change location of center
+      coords /= length(size_geo.xy);
+
+      // Make pixels outside of our circle invisible
+      if (progress * progress <= dot(coords, coords)) {
+        return vec4(0.0);
+      }
+
+      vec3 coords_tex = niri_geo_to_tex * coords_geo;
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      return color;
+    }
+
+    vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+      return expanding_circle(coords_geo, size_geo);
+    }
+
+  "
+}
+
+window-close{
+
+  duration-ms 400
+  curve "linear"
+
+  custom-shader r"
+
+    vec4 shrinking_circle(vec3 coords_geo, vec3 size_geo) {
+
+      float progress = niri_clamped_progress;
+
+      float reverse_progress = 1.0 - progress;
+
+      vec2 coords = coords_geo.xy;
+
+      vec2 center = vec2(0.5);
+
+      coords -= center;
+      coords *= size_geo.xy * 2.0;
+      coords /= length(size_geo.xy);
+
+      if (reverse_progress * reverse_progress <= dot(coords, coords)) {
+        return vec4(0.0);
+      }
+
+      vec3 coords_tex = niri_geo_to_tex * coords_geo;
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      return color;
+    }
+
+    vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+      return shrinking_circle(coords_geo, size_geo);
+    }
+
+  "
+}
