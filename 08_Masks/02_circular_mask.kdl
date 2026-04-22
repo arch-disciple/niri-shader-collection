@@ -1,0 +1,85 @@
+window-open{
+
+  duration-ms 500
+  curve "ease-out-quad"
+
+  custom-shader r"
+
+    vec4 circular_mask(vec3 coords_geo, vec3 size_geo) {
+
+      float progress = niri_clamped_progress;
+
+      float aspect_ratio = size_geo.x / size_geo.y;
+
+      vec2 coords = coords_geo.xy;
+
+      vec2 normalized_coords = vec2(coords.x * aspect_ratio, coords.y);
+
+      vec2 normalized_center = vec2(0.5 * aspect_ratio, 0.5);
+
+      float dist = distance(normalized_coords,normalized_center);
+
+      float mask = smoothstep(progress, progress + 0.2, dist);
+
+      if (coords.x < 0.0 || coords.x > 1.0 || coords.y < 0.0 || coords.y > 1.0) {
+        return vec4(0.0);
+      }
+
+      vec3 coords_tex = niri_geo_to_tex * vec3(coords, 1.0);
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      color *= (1.0 - mask);
+
+      return color;
+    }
+
+    vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+      return circular_mask(coords_geo, size_geo);
+    }
+
+  "
+}
+
+window-close{
+
+  duration-ms 400
+  curve "linear"
+
+  custom-shader r"
+
+    vec4 circular_mask_shrink(vec3 coords_geo, vec3 size_geo) {
+
+      float progress = niri_clamped_progress;
+
+      float reverse_progress = 1.0 - progress;
+
+      float aspect_ratio = size_geo.x / size_geo.y;
+
+      vec2 coords = coords_geo.xy;
+
+      vec2 normalized_coords = vec2(coords.x * aspect_ratio, coords.y);
+
+      vec2 normalized_center = vec2(0.5 * aspect_ratio, 0.5);
+
+      float dist = distance(normalized_coords,normalized_center);
+
+      float mask = smoothstep(reverse_progress, reverse_progress + 0.2, dist);
+
+      if (coords.x < 0.0 || coords.x > 1.0 || coords.y < 0.0 || coords.y > 1.0) {
+        return vec4(0.0);
+      }
+
+      vec3 coords_tex = niri_geo_to_tex * vec3(coords, 1.0);
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      color *= (1.0 - mask);
+
+      return color;
+    }
+
+    vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+      return circular_mask_shrink(coords_geo, size_geo);
+    }
+
+  "
+}

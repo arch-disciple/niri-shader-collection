@@ -1,0 +1,67 @@
+window-open{
+
+  duration-ms 500
+  curve "ease-out-quad"
+
+  custom-shader r"
+
+    vec4 reveal_mask_left_to_right(vec3 coords_geo, vec3 size_geo) {
+
+      float progress = niri_clamped_progress;
+
+      vec2 coords = coords_geo.xy;
+
+      float mask = smoothstep(progress, progress + 0.2, coords.x);
+
+      if (coords.x < 0.0 || coords.x > 1.0 || coords.y < 0.0 || coords.y > 1.0) {
+        return vec4(0.0);
+      }
+
+      vec3 coords_tex = niri_geo_to_tex * vec3(coords, 1.0);
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      color *= (1.0 - mask);
+
+      return color;
+    }
+
+    vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+      return reveal_mask_left_to_right(coords_geo, size_geo);
+    }
+
+  "
+}
+
+window-close{
+
+  duration-ms 400
+  curve "linear"
+
+  custom-shader r"
+
+    vec4 wipe_mask_left_to_right(vec3 coords_geo, vec3 size_geo) {
+
+      float progress = niri_clamped_progress;
+
+      vec2 coords = coords_geo.xy;
+
+      float mask = smoothstep(progress, progress + 0.2, coords.x);
+
+      if (coords.x < 0.0 || coords.x > 1.0 || coords.y < 0.0 || coords.y > 1.0) {
+        return vec4(0.0);
+      }
+
+      vec3 coords_tex = niri_geo_to_tex * vec3(coords, 1.0);
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+
+      color *= mask;
+
+      return color;
+    }
+
+    vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+      return wipe_mask_left_to_right(coords_geo, size_geo);
+    }
+
+  "
+}
