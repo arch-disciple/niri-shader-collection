@@ -7,19 +7,9 @@ window-open{
 
     float hash(vec2 vector) {
 
-      // Take dot product of our input vector and a constant direction vector to combine x and y components of our vector into a single scalar value
-
-      // The values 127.1 and 311.7 are prime-like numbers which make sure that x, y components of our vector don't sync too easily (to avoid diagonal patterns in our noise)
-
       float d = dot(vector, vec2(127.1, 311.7));
 
-      // sin of the scalar dot product to get a value between -1.0 and 1.0
-
       float ds = sin(d);
-
-      // Now multiply that with 43758.5453 to get a very fast oscilating sine wave
-
-      // Take fractional_part of this large value so that whenever input vector changes even slightly, a completly different output value is obtained
 
       float hash_value = fract(ds * 43758.5453);
 
@@ -28,26 +18,18 @@ window-open{
 
     float noise(vec2 vector) {
 
-      vec2 i = floor(vector); // The bottom-left corner
-      vec2 f = fract(vector); // Position inside the bottom-left corner
-
-      // smoothstep function but using math (Hermite Interpolation)
+      vec2 i = floor(vector);
+      vec2 f = fract(vector);
 
       f = f * f * (3.0 - 2.0 * f);
-
-      // Get random value from four corners of current square
 
       float bottom_left = hash(i);
       float bottom_right = hash(i + vec2(1.0, 0.0));
       float top_left = hash(i + vec2(0.0, 1.0));
       float top_right = hash(i + vec2(1.0, 1.0));
 
-      // blend corners from left to right
-
       float bottom = mix(bottom_left, bottom_right, f.x);
       float top = mix(top_left, top_right, f.x);
-
-      // blend the blended corners from bottom to top
 
       float blend = mix(bottom,top,f.y);
 
@@ -56,31 +38,23 @@ window-open{
 
     float fbm(vec2 vector, int octaves) {
 
-      // octaves is total number of layers
-      // This is to mimic nature ( clouds, mountains having many different layers )
-      // more octaves mean more details but it can be slow
-
       float total_noise = 0.0;
 
-      // contribution of current layer
       float amplitude = 0.5;
 
       for (int i = 0; i < octaves; i++){
 
-        // add noise of current layer to the total noise
         total_noise += noise(vector) * amplitude;
 
-        // zoom in or increase the frequency of features by 2.0
         vector *= 2.0;
 
-        // decrease amplitude of next layer ( more detailed noise has less contribution )
         amplitude *= 0.5;
       }
 
       return total_noise;
     }
 
-    vec4 random_noise_reveal(vec3 coords_geo, vec3 size_geo) {
+    vec4 vertical_nnoise_reveal(vec3 coords_geo, vec3 size_geo) {
 
       float progress = niri_clamped_progress;
 
@@ -93,7 +67,11 @@ window-open{
 
       float fbm_noise = fbm((coords * small_seed + big_seed), octaves);
 
-      float mask = smoothstep(progress, progress + 0.05, fbm_noise);
+      // This adds horizontal component to noise
+      // Adjust the multipliers to change how much noise the edge will have
+      float vertical_nfbm_noise = (fbm_noise * 0.25) + (0.75 * (1.0 - coords.y));
+
+      float mask = smoothstep(progress, progress + 0.05, vertical_nfbm_noise);
 
       vec3 coords_tex = niri_geo_to_tex * coords_geo;
       vec4 color = texture2D(niri_tex, coords_tex.st);
@@ -104,7 +82,7 @@ window-open{
     }
 
     vec4 open_color(vec3 coords_geo, vec3 size_geo) {
-      return random_noise_reveal(coords_geo, size_geo);
+      return vertical_nnoise_reveal(coords_geo, size_geo);
     }
 
   "
@@ -166,7 +144,7 @@ window-close{
       return total_noise;
     }
 
-    vec4 random_noise_conceal(vec3 coords_geo, vec3 size_geo) {
+    vec4 vertical_nnoise_conceal(vec3 coords_geo, vec3 size_geo) {
 
       float progress = niri_clamped_progress;
 
@@ -179,7 +157,11 @@ window-close{
 
       float fbm_noise = fbm((coords * small_seed + big_seed), octaves);
 
-      float mask = smoothstep(progress, progress + 0.05, fbm_noise);
+      // This adds horizontal component to noise
+      // Adjust the multipliers to change how much noise the edge will have
+      float vertical_nfbm_noise = (fbm_noise * 0.25) + (0.75 * (1.0 - coords.y));
+
+      float mask = smoothstep(progress, progress + 0.05, vertical_nfbm_noise);
 
       vec3 coords_tex = niri_geo_to_tex * coords_geo;
       vec4 color = texture2D(niri_tex, coords_tex.st);
@@ -190,7 +172,7 @@ window-close{
     }
 
     vec4 close_color(vec3 coords_geo, vec3 size_geo) {
-      return random_noise_conceal(coords_geo, size_geo);
+      return vertical_nnoise_conceal(coords_geo, size_geo);
     }
 
   "
