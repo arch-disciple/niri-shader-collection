@@ -14,9 +14,9 @@ Starting from the very basic fade animations, all the way up to complex burn eff
 
 | Animation Name | Preview | Source Code |
 | :--- | :--- | :--- |
-| Ribbons | <video src="./DEMOS/ribbons.mp4" width="300" muted autoplay loop></video> | [ribbons](./07_Ribbons/04_rotated.kdl) |
-| Burn | <video src="./DEMOS/burn.mp4" width="300" muted autoplay loop></video> | [burn](./10_Advanced/burn.kdl) |
-| Honeycomb |<video src="./DEMOS/honeycomb.mp4" width="300" muted autoplay loop></video> | [honeycomb](./10_Advanced/honeycomb.kdl) |
+| Ribbons | <img src="./DEMOS/GIFs/ribbons.gif" width="500" alt="Ribbons Demo"> | [ribbons](./07_Ribbons/04_rotated.kdl) |
+| Burn | <img src="./DEMOS/GIFs/burn.gif" width="500" alt="Burn Demo"> | [burn](./10_Advanced/burn.kdl) |
+| Honeycomb | <img src="./DEMOS/GIFs/honeycomb.gif" width="500" alt="Honeycomb Demo"> | [honeycomb](./10_Advanced/honeycomb.kdl) |
 
 ## 🚀 Usage
 
